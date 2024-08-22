@@ -17,7 +17,7 @@ module.exports = function (app) {
             _id: book._id,
             title: book.title,
             comments: book.comments,
-            commentCount: book.comments.length,
+            commentcount: book.comments.length,
           };
         });
       } catch (err) {
@@ -60,7 +60,7 @@ module.exports = function (app) {
           comments: book.comments,
           _id: book._id,
           title: book.title,
-          commentCount: book.comments.length,
+          commentcount: book.comments.length,
         });
       } catch (err) {
         res.send("no book exists");
@@ -82,7 +82,7 @@ module.exports = function (app) {
           comments: book.comments,
           _id: book._id,
           title: book.title,
-          commentCount: book.comments.length,
+          commentcount: book.comments.length,
         });
       } catch (err) {
         res.send("no book exists");
