@@ -6,37 +6,47 @@ module.exports = function (app) {
 
   app.route('/api/books')
     .get(async (req, res) => {
+      const bookid = req.params.id;
       try {
-        const books = await Book.find({});
-        if (!books) {
-          return res.json([]);
+        const book = await Book.findById(bookid);
+        if (!book) {
+          return res.status(404).send("no book exists");
         }
-        const formatData = books.map((book) => ({
+        res.json({
           _id: book._id,
           title: book.title,
           comments: book.comments,
           commentcount: book.comments.length,
-        }));
-        res.json(formatData);
+        });
       } catch (err) {
-        res.status(500).json([]);
+        return res.status(404).send("no book exists");
       }
     })
-    
+
     .post(async (req, res) => {
-      const { title } = req.body;
-      if (!title) {
-        return res.status(400).send("missing required field title");
+      const bookid = req.params.id;
+      const { comment } = req.body;
+      if (!comment) {
+        return res.status(400).send("missing required field comment");
       }
-      const newBook = new Book({ title, comments: [] });
       try {
-        const book = await newBook.save();
-        res.status(201).json({ _id: book._id, title: book.title });
+        const book = await Book.findById(bookid);
+        if (!book) {
+          return res.status(404).send("no book exists");
+        }
+        book.comments.push(comment);
+        await book.save();
+        res.json({
+          _id: book._id,
+          title: book.title,
+          comments: book.comments,
+          commentcount: book.comments.length,
+        });
       } catch (err) {
-        res.status(500).send("there was an error saving");
-      }    
+        return res.status(404).send("no book exists");
+      }
     })
-    
+
     .delete(async (req, res) => {
       try {
         await Book.deleteMany();
