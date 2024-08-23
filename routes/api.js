@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const { Book } = require('./models'); // Assuming your models are defined in models.js
+const Book = require('../models').Book;
 
 const app = express();
 app.use(bodyParser.json());
