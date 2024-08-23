@@ -49,10 +49,15 @@ module.exports = function (app) {
     .get(async (req, res) => {
       const bookid = req.params.id;
       try {
+        if (!mongoose.Types.ObjectId.isValid(bookid)) {
+          return res.status(404).send("no book exists");
+        }
+  
         const book = await Book.findById(bookid);
         if (!book) {
           return res.status(404).send("no book exists");
         }
+  
         res.json({
           _id: book._id,
           title: book.title,
@@ -60,6 +65,7 @@ module.exports = function (app) {
           commentcount: book.comments.length,
         });
       } catch (err) {
+        console.error(err);
         res.status(500).send("no book exists");
       }
     })
