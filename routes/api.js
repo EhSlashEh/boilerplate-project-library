@@ -1,6 +1,6 @@
 'use strict';
 
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 const Book = require("../models").Book;
 
 module.exports = function (app) {
@@ -34,7 +34,6 @@ module.exports = function (app) {
         const savedBook = await newBook.save();
         res.status(201).json({ _id: savedBook._id, title: savedBook.title });
       } catch (err) {
-        console.error(err);
         res.status(500).send("there was an error saving");
       }
     })
@@ -69,7 +68,6 @@ module.exports = function (app) {
           commentcount: book.comments.length,
         });
       } catch (err) {
-        console.error(err);
         res.status(500).send("error occurred while retrieving book");
       }
     })
@@ -119,7 +117,6 @@ module.exports = function (app) {
         }
         res.send("delete successful");
       } catch (err) {
-        console.error("Error deleting book:", err);
         res.status(500).send("no book exists");
       }
     });
