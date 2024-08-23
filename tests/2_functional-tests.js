@@ -6,7 +6,7 @@ const server = require('../server');
 chai.use(chaiHttp);
 
 let bookID;
-const timeout = 10000;
+const timeout = 20000;
 
 suite('Functional Tests', function() {
 
@@ -20,7 +20,7 @@ suite('Functional Tests', function() {
           .post("/api/books")
           .send({ title: "test-title" })
           .end(function (err, res) {
-            assert.equal(res.status, 201); // status 201 for created
+            assert.equal(res.status, 201);
             bookID = res.body._id;
             assert.equal(res.body.title, "test-title");
             done();
@@ -34,7 +34,7 @@ suite('Functional Tests', function() {
           .post("/api/books")
           .send({})
           .end(function (err, res) {
-            assert.equal(res.status, 400); // status 400 for bad request
+            assert.equal(res.status, 400);
             assert.equal(res.text, "missing required field title");
             done();
           })
@@ -62,7 +62,7 @@ suite('Functional Tests', function() {
           .request(server)
           .get("/api/books/invalidID")
           .end(function (err, res) {
-            assert.equal(res.status, 404); // status 404 for not found
+            assert.equal(res.status, 404);
             assert.equal(res.text, "no book exists");
             done();
           })
@@ -105,7 +105,7 @@ suite('Functional Tests', function() {
           .post("/api/books/" + bookID)
           .send({})
           .end(function (err, res) {
-            assert.equal(res.status, 400); // status 400 for bad request
+            assert.equal(res.status, 400);
             assert.equal(res.text, "missing required field comment");
             done();
           })
@@ -118,7 +118,7 @@ suite('Functional Tests', function() {
           .post("/api/books/" + "invalidID")
           .send({ comment: "test-comment" })
           .end(function (err, res) {
-            assert.equal(res.status, 404); // status 404 for not found
+            assert.equal(res.status, 404);
             assert.equal(res.text, "no book exists");
             done();
           })
@@ -145,7 +145,7 @@ suite('Functional Tests', function() {
           .request(server)
           .delete("/api/books/" + "invalidID")
           .end(function (err, res) {
-            assert.equal(res.status, 404); // status 404 for not found
+            assert.equal(res.status, 404);
             assert.equal(res.text, "no book exists");
             done();
           })

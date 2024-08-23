@@ -24,14 +24,17 @@ module.exports = function (app) {
     
     .post(async (req, res) => {
       const { title } = req.body;
+
       if (!title) {
         return res.status(400).send("missing required field title");
       }
+
       try {
         const newBook = new Book({ title, comments: [] });
         const savedBook = await newBook.save();
         res.status(201).json({ _id: savedBook._id, title: savedBook.title });
       } catch (err) {
+        console.error(err);
         res.status(500).send("there was an error saving");
       }
     })
@@ -67,23 +70,26 @@ module.exports = function (app) {
         });
       } catch (err) {
         console.error(err);
-        res.status(500).send("no book exists");
+        res.status(500).send("error occurred while retrieving book");
       }
     })
     
     .post(async (req, res) => {
       const bookid = req.params.id;
       const { comment } = req.body;
+
       if (!comment) {
         return res.status(400).send("missing required field comment");
       }
+
       try {
         const book = await Book.findById(bookid);
         if (!book) {
-          return res.status(404).send("no book exists");
+          return res.status(404).json({ error: "no book exists" });
         }
         book.comments.push(comment);
         await book.save();
+
         res.json({
           _id: book._id,
           title: book.title,
