@@ -1,11 +1,3 @@
-/*
-*
-*
-*       FILL IN EACH FUNCTIONAL TEST BELOW COMPLETELY
-*       -----[Keep the tests in the same order!]-----
-*       
-*/
-
 const chaiHttp = require('chai-http');
 const chai = require('chai');
 const assert = chai.assert;
@@ -15,19 +7,18 @@ chai.use(chaiHttp);
 
 let bookID;
 const timeout = 10000;
+
 suite('Functional Tests', function() {
 
   suite('Routing tests', function() {
-    suite(
-      'POST /api/books with title => create book object/expect book object', 
-      function() {      
+    suite('POST /api/books with title => create book object/expect book object', function() {      
       test('Test POST /api/books with title', function(done) {
         chai
           .request(server)
           .post("/api/books")
           .send({ title: "test-title" })
           .end(function (err, res) {
-            assert.equal(res.status, 200);
+            assert.equal(res.status, 201); // status 201 for created
             bookID = res.body._id;
             assert.equal(res.body.title, "test-title");
             done();
@@ -41,7 +32,7 @@ suite('Functional Tests', function() {
           .post("/api/books")
           .send({})
           .end(function (err, res) {
-            assert.equal(res.status, 200);
+            assert.equal(res.status, 400); // status 400 for bad request
             assert.equal(res.text, "missing required field title");
             done();
           })
@@ -53,10 +44,10 @@ suite('Functional Tests', function() {
       test('Test GET /api/books',  function(done){
         chai
           .request(server)
-          .post("/api/books")
+          .get("/api/books")
           .end(function (err, res) {
             assert.equal(res.status, 200);
-            assert.isArray(res.text, "it is an array");
+            assert.isArray(res.body, "Response should be an array");
             done();
           })
           .timeout(timeout);
@@ -67,9 +58,9 @@ suite('Functional Tests', function() {
       test('Test GET /api/books/[id] with id not in db',  function(done){
         chai
           .request(server)
-          .post("/api/books/invalidID")
+          .get("/api/books/invalidID")
           .end(function (err, res) {
-            assert.equal(res.status, 200);
+            assert.equal(res.status, 404); // status 404 for not found
             assert.equal(res.text, "no book exists");
             done();
           })
@@ -79,19 +70,18 @@ suite('Functional Tests', function() {
       test('Test GET /api/books/[id] with valid id in db',  function(done){
         chai
           .request(server)
-          .post("/api/books/" + bookID)
+          .get("/api/books/" + bookID)
           .end(function (err, res) {
             assert.equal(res.status, 200);
             assert.equal(res.body.title, "test-title");
+            assert.isArray(res.body.comments, "comments should be an array");
             done();
           })
           .timeout(timeout);
       });      
     });
 
-    suite(
-      'POST /api/books/[id] => add comment/expect book object with id', 
-      function(){      
+    suite('POST /api/books/[id] => add comment/expect book object with id', function(){      
       test('Test POST /api/books/[id] with comment', function(done){
         chai
           .request(server)
@@ -99,7 +89,8 @@ suite('Functional Tests', function() {
           .send({ comment: "test-comment" })
           .end(function (err, res) {
             assert.equal(res.status, 200);
-            assert.equal(res.body.comments[0], "test-comment");
+            assert.isArray(res.body.comments, "comments should be an array");
+            assert.equal(res.body.comments[res.body.comments.length - 1], "test-comment");
             done();
           })
           .timeout(timeout);
@@ -111,8 +102,8 @@ suite('Functional Tests', function() {
           .post("/api/books/" + bookID)
           .send({})
           .end(function (err, res) {
-            assert.equal(res.status, 200);
-            assert.equal(res.text, "missing required field");
+            assert.equal(res.status, 400); // status 400 for bad request
+            assert.equal(res.text, "missing required field comment");
             done();
           })
           .timeout(timeout);
@@ -124,8 +115,8 @@ suite('Functional Tests', function() {
           .post("/api/books/" + "invalidID")
           .send({ comment: "test-comment" })
           .end(function (err, res) {
-            assert.equal(res.status, 200);
-            assert.equal(res.text, "no book exist");
+            assert.equal(res.status, 404); // status 404 for not found
+            assert.equal(res.text, "no book exists");
             done();
           })
           .timeout(timeout);
@@ -145,12 +136,12 @@ suite('Functional Tests', function() {
           .timeout(timeout);
       });
 
-      test('Test DELETE /api/books/[id] with  id not in db', function(done){
+      test('Test DELETE /api/books/[id] with id not in db', function(done){
         chai
           .request(server)
           .delete("/api/books/" + "invalidID")
           .end(function (err, res) {
-            assert.equal(res.status, 200);
+            assert.equal(res.status, 404); // status 404 for not found
             assert.equal(res.text, "no book exists");
             done();
           })
