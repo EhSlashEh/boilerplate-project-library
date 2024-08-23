@@ -1,160 +1,111 @@
-'use strict';
-
+const express = require('express');
+const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const Book = require("../models").Book;
+const { Book } = require('./models'); // Assuming your models are defined in models.js
 
-module.exports = function (app) {
+const app = express();
+app.use(bodyParser.json());
 
-  app.route('/api/books')
-
-    .get(async (req, res) => {
-      console.log("GET /api/books received");
-
-      try {
-        const books = await Book.find({});
-        console.log("Books found:", books);
-
-        if (books.length === 0) {
-          return res.status(404).send("no book exists");
-        }
-
-        const formattedBooks = books.map(book => ({
-          _id: book._id,
-          title: book.title,
-          comments: book.comments,
-          commentcount: book.comments.length
-        }));
-        
-        res.json(formattedBooks);
-      } catch (err) {
-        console.error("Error retrieving books:", err);
-        res.status(500).send("error occurred while retrieving books");
-      }
-    })
-    
-    .post(async (req, res) => {
-      const { title } = req.body;
-      console.log("POST /api/books received with title:", title);
-
-      if (!title) {
-        console.log("Title is missing");
-        return res.status(400).send("missing required field title");
-      }
-
-      try {
-        const newBook = new Book({ title, comments: [] });
-        const savedBook = await newBook.save();
-        console.log("Book created:", savedBook);
-        res.status(201).json({ _id: savedBook._id, title: savedBook.title });
-      } catch (err) {
-        console.error("Error saving book:", err);
-        res.status(500).send("error occurred while saving book");
-      }
-    })
-    
-    .delete(async (req, res) => {
-      console.log("DELETE /api/books received");
-
-      try {
-        await Book.deleteMany({});
-        console.log("All books deleted successfully");
-        res.send("complete delete successful");
-      } catch (err) {
-        console.error("Error deleting all books:", err);
-        res.status(500).send("error occurred while deleting books");
-      }
-    });
+// POST /api/books
+app.post('/api/books', async (req, res) => {
+  const { title } = req.body;
   
-  app.route('/api/books/:id')  
+  if (!title) {
+    return res.json({ error: 'missing required field title' });
+  }
+  
+  try {
+    const book = new Book({ title });
+    await book.save();
+    res.json({ title: book.title, _id: book._id });
+  } catch (err) {
+    res.json({ error: 'could not create book' });
+  }
+});
 
-    .get(async (req, res) => {
-      const bookid = req.params.id;
-      console.log("GET /api/books/:id received with id:", bookid);
+// GET /api/books
+app.get('/api/books', async (req, res) => {
+  try {
+    const books = await Book.find({});
+    res.json(books.map(book => ({
+      _id: book._id,
+      title: book.title,
+      commentcount: book.comments.length
+    })));
+  } catch (err) {
+    res.json({ error: 'could not retrieve books' });
+  }
+});
 
-      try {
-        if (!mongoose.Types.ObjectId.isValid(bookid)) {
-          console.log("Invalid ID:", bookid);
-          return res.status(404).send("no book exists");
-        }
-
-        const book = await Book.findById(bookid);
-        if (!book) {
-          console.log("Book not found for id:", bookid);
-          return res.status(404).send("no book exists");
-        }
-
-        console.log("Book found:", book);
-        res.json({
-          _id: book._id,
-          title: book.title,
-          comments: book.comments,
-          commentcount: book.comments.length,
-        });
-      } catch (err) {
-        console.error("Error retrieving book:", err);
-        res.status(500).send("error occurred while retrieving book");
-      }
-    })
-    
-    .post(async (req, res) => {
-      const bookid = req.params.id;
-      const { comment } = req.body;
-      console.log("POST /api/books/:id received with id:", bookid, "and comment:", comment);
-
-      if (!comment) {
-        console.log("Comment is missing");
-        return res.status(400).send("missing required field comment");
-      }
-      
-      if (!mongoose.Types.ObjectId.isValid(bookid)) {
-        console.log("Invalid ID:", bookid);
-        return res.status(404).send("no book exists");
-      }
-
-      try {
-        const book = await Book.findById(bookid);
-        if (!book) {
-          console.log("Book not found for id:", bookid);
-          return res.status(404).send("no book exists");
-        }
-        book.comments.push(comment);
-        await book.save();
-
-        console.log("Comment added. Updated book:", book);
-        res.json({
-          _id: book._id,
-          title: book.title,
-          comments: book.comments,
-          commentcount: book.comments.length,
-        });
-      } catch (err) {
-        console.error("Error adding comment:", err);
-        res.status(500).send("error occurred while adding comment");
-      }
-    })
-    
-    .delete(async (req, res) => {
-      const bookid = req.params.id;
-      console.log("DELETE /api/books/:id received with id:", bookid);
-
-      if (!mongoose.Types.ObjectId.isValid(bookid)) {
-        console.log("Invalid ID:", bookid);
-        return res.status(404).send("no book exists");
-      }
-
-      try {
-        const deletedBook = await Book.findByIdAndDelete(bookid);
-        if (!deletedBook) {
-          console.log("Book not found for id:", bookid);
-          return res.status(404).send("no book exists");
-        }
-
-        console.log("Book deleted:", deletedBook);
-        res.send("delete successful");
-      } catch (err) {
-        console.error("Error deleting book:", err);
-        res.status(500).send("error occurred while deleting book");
-      }
+// GET /api/books/:id
+app.get('/api/books/:id', async (req, res) => {
+  const { id } = req.params;
+  
+  try {
+    const book = await Book.findById(id);
+    if (!book) {
+      return res.json({ error: 'no book exists' });
+    }
+    res.json({
+      _id: book._id,
+      title: book.title,
+      comments: book.comments
     });
+  } catch (err) {
+    res.json({ error: 'could not retrieve book' });
+  }
+});
 
-};
+// POST /api/books/:id/comments
+app.post('/api/books/:id/comments', async (req, res) => {
+  const { id } = req.params;
+  const { comment } = req.body;
+  
+  if (!comment) {
+    return res.json({ error: 'missing required field comment' });
+  }
+  
+  try {
+    const book = await Book.findById(id);
+    if (!book) {
+      return res.json({ error: 'no book exists' });
+    }
+    book.comments.push(comment);
+    await book.save();
+    res.json({
+      _id: book._id,
+      title: book.title,
+      comments: book.comments
+    });
+  } catch (err) {
+    res.json({ error: 'could not add comment' });
+  }
+});
+
+// DELETE /api/books/:id
+app.delete('/api/books/:id', async (req, res) => {
+  const { id } = req.params;
+  
+  try {
+    const result = await Book.findByIdAndDelete(id);
+    if (result) {
+      res.json({ result: 'delete successful' });
+    } else {
+      res.json({ error: 'no book exists' });
+    }
+  } catch (err) {
+    res.json({ error: 'could not delete book' });
+  }
+});
+
+// DELETE /api/books
+app.delete('/api/books', async (req, res) => {
+  try {
+    await Book.deleteMany({});
+    res.json({ result: 'complete delete successful' });
+  } catch (err) {
+    res.json({ error: 'could not delete all books' });
+  }
+});
+
+module.exports = app;
