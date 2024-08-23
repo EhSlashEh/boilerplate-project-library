@@ -6,11 +6,11 @@ const $ = require('jquery'); // Ensure you have jQuery available
 
 chai.use(chaiHttp);
 
-suite('Functional Tests', function() {
-  
+describe('Functional Tests', function() {
+
   // Test POST /api/books with title and missing title
-  suite('POST /api/books', function() {
-    test('should create a book with title', async function() {
+  describe('POST /api/books', function() {
+    it('should create a book with title', async function() {
       try {
         let url = '/api/books';
         let data1 = await chai.request(server).post(url).send({ title: 'Faux Book 1' });
@@ -29,8 +29,8 @@ suite('Functional Tests', function() {
   });
 
   // Test GET /api/books to retrieve all books
-  suite('GET /api/books', function() {
-    test('should return all books', async function() {
+  describe('GET /api/books', function() {
+    it('should return all books', async function() {
       try {
         let url = '/api/books';
         let a = chai.request(server).post(url).send({ title: 'Faux Book A' });
@@ -56,8 +56,8 @@ suite('Functional Tests', function() {
   });
 
   // Test GET /api/books/{_id} to retrieve a single book
-  suite('GET /api/books/:id', function() {
-    test('should return a single book by ID', async function() {
+  describe('GET /api/books/:id', function() {
+    it('should return a single book by ID', async function() {
       try {
         let url = '/api/books';
         let noBook = await chai.request(server).get(url + '/5f665eb46e296f6b9b6a504d');
@@ -80,8 +80,8 @@ suite('Functional Tests', function() {
   });
 
   // Test POST /api/books/{_id} to add a comment
-  suite('POST /api/books/:id/comments', function() {
-    test('should add a comment to a book', async function() {
+  describe('POST /api/books/:id/comments', function() {
+    it('should add a comment to a book', async function() {
       try {
         let url = '/api/books';
         let commentTarget = await chai.request(server).post(url).send({ title: 'Notable Book' });
@@ -115,8 +115,8 @@ suite('Functional Tests', function() {
   });
 
   // Test DELETE /api/books/{_id} to delete a book
-  suite('DELETE /api/books/:id', function() {
-    test('should delete a book by ID', async function() {
+  describe('DELETE /api/books/:id', function() {
+    it('should delete a book by ID', async function() {
       try {
         let url = '/api/books';
         let deleteTarget = await chai.request(server).post(url).send({ title: 'Deletable Book' });
@@ -137,8 +137,8 @@ suite('Functional Tests', function() {
   });
 
   // Test DELETE /api/books to delete all books
-  suite('DELETE /api/books', function() {
-    test('should delete all books', async function() {
+  describe('DELETE /api/books', function() {
+    it('should delete all books', async function() {
       try {
         const deleteAll = await chai.request(server).delete('/api/books');
         assert.isString(deleteAll.text);
