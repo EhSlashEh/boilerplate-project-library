@@ -81,6 +81,10 @@ module.exports = function (app) {
       if (!comment) {
         return res.status(400).send("missing required field comment");
       }
+      
+      if (!mongoose.Types.ObjectId.isValid(bookid)) {
+        return res.status(404).send("no book exists");
+      }
 
       try {
         const book = await Book.findById(bookid);
@@ -103,6 +107,11 @@ module.exports = function (app) {
     
     .delete(async (req, res) => {
       const bookid = req.params.id;
+
+      if (!mongoose.Types.ObjectId.isValid(bookid)) {
+        return res.status(404).send("no book exists");
+      }
+
       try {
         const deletedBook = await Book.findByIdAndDelete(bookid);
         if (!deletedBook) {
@@ -110,6 +119,7 @@ module.exports = function (app) {
         }
         res.send("delete successful");
       } catch (err) {
+        console.error("Error deleting book:", err);
         res.status(500).send("no book exists");
       }
     });
