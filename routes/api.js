@@ -28,7 +28,7 @@ module.exports = function (app) {
         res.json(formattedBooks);
       } catch (err) {
         console.error("Error retrieving books:", err);
-        res.status(500).json([]);
+        res.status(500).send("error occurred while retrieving books");
       }
     })
     
@@ -48,7 +48,7 @@ module.exports = function (app) {
         res.status(201).json({ _id: savedBook._id, title: savedBook.title });
       } catch (err) {
         console.error("Error saving book:", err);
-        res.status(500).send("there was an error saving");
+        res.status(500).send("error occurred while saving book");
       }
     })
     
@@ -61,14 +61,13 @@ module.exports = function (app) {
         res.send("complete delete successful");
       } catch (err) {
         console.error("Error deleting all books:", err);
-        res.status(500).send("error");
+        res.status(500).send("error occurred while deleting books");
       }
     });
   
   app.route('/api/books/:id')  
 
     .get(async (req, res) => {
-      
       const bookid = req.params.id;
       console.log("GET /api/books/:id received with id:", bookid);
 
@@ -116,7 +115,7 @@ module.exports = function (app) {
         const book = await Book.findById(bookid);
         if (!book) {
           console.log("Book not found for id:", bookid);
-          return res.status(404).json({ error: "no book exists" });
+          return res.status(404).send("no book exists");
         }
         book.comments.push(comment);
         await book.save();
@@ -130,7 +129,7 @@ module.exports = function (app) {
         });
       } catch (err) {
         console.error("Error adding comment:", err);
-        res.status(500).send("there was an error adding the comment");
+        res.status(500).send("error occurred while adding comment");
       }
     })
     
@@ -154,7 +153,7 @@ module.exports = function (app) {
         res.send("delete successful");
       } catch (err) {
         console.error("Error deleting book:", err);
-        res.status(500).send("no book exists");
+        res.status(500).send("error occurred while deleting book");
       }
     });
 
