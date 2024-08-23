@@ -125,30 +125,72 @@ suite('Functional Tests', function() {
       });      
     });
 
-    suite('POST /api/books/[id] => add comment/expect book object with id', function(){
-      
+    suite(
+      'POST /api/books/[id] => add comment/expect book object with id', 
+      function(){      
       test('Test POST /api/books/[id] with comment', function(done){
-        //done();
+        chai
+          .request(server)
+          .post("/api/books/" + bookID)
+          .send({ comment: "test-comment" })
+          .end(function (err, res) {
+            assert.equal(res.status, 200);
+            assert.equal(res.body.comments[0], "test-comment");
+            done();
+          })
+          .timeout(timeout);
       });
 
       test('Test POST /api/books/[id] without comment field', function(done){
-        //done();
+        chai
+          .request(server)
+          .post("/api/books/" + bookID)
+          .send({})
+          .end(function (err, res) {
+            assert.equal(res.status, 200);
+            assert.equal(res.text, "missing required field");
+            done();
+          })
+          .timeout(timeout);
       });
 
       test('Test POST /api/books/[id] with comment, id not in db', function(done){
-        //done();
-      });
-      
+        chai
+          .request(server)
+          .post("/api/books/" + "invalidID")
+          .send({ comment: "test-comment" })
+          .end(function (err, res) {
+            assert.equal(res.status, 200);
+            assert.equal(res.text, "no book exist");
+            done();
+          })
+          .timeout(timeout);
+      });      
     });
 
     suite('DELETE /api/books/[id] => delete book object id', function() {
-
       test('Test DELETE /api/books/[id] with valid id in db', function(done){
-        //done();
+        chai
+          .request(server)
+          .delete("/api/books/" + bookID)
+          .end(function (err, res) {
+            assert.equal(res.status, 200);
+            assert.equal(res.text, "delete successful");
+            done();
+          })
+          .timeout(timeout);
       });
 
       test('Test DELETE /api/books/[id] with  id not in db', function(done){
-        //done();
+        chai
+          .request(server)
+          .delete("/api/books/" + "invalidID")
+          .end(function (err, res) {
+            assert.equal(res.status, 200);
+            assert.equal(res.text, "no book exists");
+            done();
+          })
+          .timeout(timeout);
       });
 
     });
