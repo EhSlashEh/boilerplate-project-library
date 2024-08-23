@@ -14,12 +14,17 @@ module.exports = function (app) {
         const books = await Book.find({});
         console.log("Books found:", books);
 
+        if (books.length === 0) {
+          return res.status(404).send("no book exists");
+        }
+
         const formattedBooks = books.map(book => ({
           _id: book._id,
           title: book.title,
           comments: book.comments,
           commentcount: book.comments.length
         }));
+        
         res.json(formattedBooks);
       } catch (err) {
         console.error("Error retrieving books:", err);
